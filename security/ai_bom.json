@@ -1,0 +1,35 @@
+{
+  "generated_at": "2025-11-20T13:10:45.770442Z",
+  "mlflow_tracking_uri": "http://localhost:5000",
+  "git_commit": null,
+  "components": [
+    {
+      "component": "sklearn",
+      "path": "sklearn/data.csv",
+      "status": "ok",
+      "expected_sha256": "bb9ca4041a66e0ed691cb825188f16fdab518435c4950a080951be2fdfe30d4d",
+      "observed_sha256": "bb9ca4041a66e0ed691cb825188f16fdab518435c4950a080951be2fdfe30d4d"
+    },
+    {
+      "component": "sklearn",
+      "path": "sklearn/data.db",
+      "status": "ok",
+      "expected_sha256": "51819365c569aa25e8367a62ba56537148a03dc6781034bd50dd8caab09e740b",
+      "observed_sha256": "51819365c569aa25e8367a62ba56537148a03dc6781034bd50dd8caab09e740b"
+    },
+    {
+      "component": "autogluon",
+      "path": "autogluon/data/Advertising.csv",
+      "status": "ok",
+      "expected_sha256": "98350ef2035798df4dce301c8bbaf288030e678b43fa9713d5849d73cedc4cfd",
+      "observed_sha256": "98350ef2035798df4dce301c8bbaf288030e678b43fa9713d5849d73cedc4cfd"
+    },
+    {
+      "component": "autogluon",
+      "path": "autogluon/data/data.db",
+      "status": "ok",
+      "expected_sha256": "2cdefd50be23efddd141120b97c1ddb7cbeba1d16dbe97436b4dcdef8981b41f",
+      "observed_sha256": "2cdefd50be23efddd141120b97c1ddb7cbeba1d16dbe97436b4dcdef8981b41f"
+    }
+  ]
+}

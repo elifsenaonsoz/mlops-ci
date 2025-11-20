@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual envs
+.venv/
+venv/
+
+# MLflow local state
+mlruns/
+mlartifacts/
+mlflow.db
+mlruns.db
+mlflow_run_url.txt
+
+# Çıktılar / geçici dosyalar
+artifacts/
+notes/
+
+# Büyük doküman ve ekran görüntüleri (ödev için git'te tutmana gerek yok)
+*.pdf
+*.png
+*.rtf
+/data.db

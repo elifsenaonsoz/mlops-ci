@@ -1,0 +1,5 @@
+outs:
+- md5: 0b6e430ea4ab118ca1e8f1e2dba1e0b1
+  size: 880640
+  hash: md5
+  path: data.db

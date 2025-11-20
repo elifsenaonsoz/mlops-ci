@@ -1,0 +1,10 @@
+{
+  "sklearn": {
+    "sklearn/data.csv": "bb9ca4041a66e0ed691cb825188f16fdab518435c4950a080951be2fdfe30d4d",
+    "sklearn/data.db": "51819365c569aa25e8367a62ba56537148a03dc6781034bd50dd8caab09e740b"
+  },
+  "autogluon": {
+    "autogluon/data/Advertising.csv": "98350ef2035798df4dce301c8bbaf288030e678b43fa9713d5849d73cedc4cfd",
+    "autogluon/data/data.db": "2cdefd50be23efddd141120b97c1ddb7cbeba1d16dbe97436b4dcdef8981b41f"
+  }
+}
