@@ -1,8 +1,11 @@
 pipeline {
-  agent any        // Artık her stage host Jenkins node'unda çalışacak
+  agent any
   options { timestamps() }
 
   environment {
+    // Sistemdeki Python yorumlayıcısı
+    PY = 'python3'
+
     // MLflow server'ın local çalışıyor
     MLFLOW_TRACKING_URI = 'http://127.0.0.1:5000'
     MLFLOW_UI_BASE      = 'http://127.0.0.1:5000'
@@ -15,11 +18,10 @@ pipeline {
       steps {
         sh '''
           set -e
-          python -m pip install -U pip
-          pip install --no-cache-dir mlflow==2.14.1
+          $PY -m pip install -U pip
+          $PY -m pip install --no-cache-dir mlflow==2.14.1
 
-          # Jenkins workspace'teyiz, repo zaten checkout edildi
-          python security/security_checks.py \
+          $PY security/security_checks.py \
             --target sklearn \
             --mlflow-uri ${MLFLOW_TRACKING_URI} \
             --write-bom security/ai_bom.json
@@ -36,8 +38,8 @@ pipeline {
       steps {
         sh '''
           set -e
-          python -m pip install -U pip
-          pip install --no-cache-dir dvc
+          $PY -m pip install -U pip
+          $PY -m pip install --no-cache-dir dvc
 
           dvc pull
           dvc status
@@ -52,17 +54,17 @@ pipeline {
       steps {
         sh '''
           set -e
-          python -m pip install -U pip
+          $PY -m pip install -U pip
           if [ -f requirements_sklearn.txt ]; then
-            pip install --no-cache-dir -r requirements_sklearn.txt
+            $PY -m pip install --no-cache-dir -r requirements_sklearn.txt
           else
-            pip install --no-cache-dir mlflow==2.14.1 scikit-learn pandas numpy matplotlib sqlalchemy requests
+            $PY -m pip install --no-cache-dir mlflow==2.14.1 scikit-learn pandas numpy matplotlib sqlalchemy requests
           fi
 
           cd sklearn
           MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI} \
           MLFLOW_EXPERIMENT_NAME=exp_sklearn_secure \
-          python train_sklearn.py \
+          $PY train_sklearn.py \
             --experiment exp_sklearn_secure \
             --test_size 0.2 \
             --random_state 42 | tee "$WORKSPACE/sklearn_train.log"
