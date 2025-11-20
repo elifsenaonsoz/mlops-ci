@@ -1,30 +1,24 @@
 pipeline {
-  agent any
+  agent any        // Artık her stage host Jenkins node'unda çalışacak
   options { timestamps() }
 
   environment {
-    // Güvenli MLflow endpoint'in (Mac Docker için host.docker.internal)
-    MLFLOW_TRACKING_URI = 'http://host.docker.internal:5000'
-    MLFLOW_UI_BASE      = 'http://host.docker.internal:5000'
+    // MLflow server'ın local çalışıyor
+    MLFLOW_TRACKING_URI = 'http://127.0.0.1:5000'
+    MLFLOW_UI_BASE      = 'http://127.0.0.1:5000'
     MLFLOW_ALLOW_REMOTE = '0'
   }
 
   stages {
 
     stage('Security - Preflight') {
-      agent {
-        docker {
-          image 'python:3.10-slim'
-          args "-v ${WORKSPACE}:/work -w /work"
-        }
-      }
       steps {
         sh '''
           set -e
           python -m pip install -U pip
           pip install --no-cache-dir mlflow==2.14.1
 
-          cd /work
+          # Jenkins workspace'teyiz, repo zaten checkout edildi
           python security/security_checks.py \
             --target sklearn \
             --mlflow-uri ${MLFLOW_TRACKING_URI} \
@@ -39,16 +33,9 @@ pipeline {
     }
 
     stage('Data Versioning (DVC pull)') {
-      agent {
-        docker {
-          image 'python:3.10-slim'
-          args "-v ${WORKSPACE}:/work -w /work"
-        }
-      }
       steps {
         sh '''
           set -e
-          cd /work
           python -m pip install -U pip
           pip install --no-cache-dir dvc
 
@@ -62,23 +49,17 @@ pipeline {
       environment {
         MLFLOW_EXPERIMENT_NAME = 'exp_sklearn_secure'
       }
-      agent {
-        docker {
-          image 'python:3.10-slim'
-          args "-u root:root -v ${WORKSPACE}:/work -w /work"
-        }
-      }
       steps {
         sh '''
           set -e
           python -m pip install -U pip
-          if [ -f /work/requirements_sklearn.txt ]; then
-            pip install --no-cache-dir -r /work/requirements_sklearn.txt
+          if [ -f requirements_sklearn.txt ]; then
+            pip install --no-cache-dir -r requirements_sklearn.txt
           else
             pip install --no-cache-dir mlflow==2.14.1 scikit-learn pandas numpy matplotlib sqlalchemy requests
           fi
 
-          cd /work/sklearn
+          cd sklearn
           MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI} \
           MLFLOW_EXPERIMENT_NAME=exp_sklearn_secure \
           python train_sklearn.py \
@@ -95,9 +76,6 @@ pipeline {
         }
       }
     }
-
-    // İstersen otomatik Git + DVC push için bu stage'i sonra ekleriz.
-    // Şimdilik pipeline'ın sorunsuz yeşil olması için burayı boş bırakıyoruz.
   }
 
   post {
