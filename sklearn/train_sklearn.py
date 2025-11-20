@@ -214,7 +214,6 @@ def main():
     )
 
     with mlflow.start_run(run_name="linear-regression") as run:
-        # ── Güvenlik / izlenebilirlik için meta-tag'ler ────────────────────────────
         mlflow.set_tag("jenkins_job", os.getenv("JOB_NAME"))
         mlflow.set_tag("jenkins_build_number", os.getenv("BUILD_NUMBER"))
         mlflow.set_tag("git_commit", os.getenv("GIT_COMMIT"))
@@ -227,8 +226,24 @@ def main():
         except Exception:
             pass
 
-        # Tracking URI'nin local/izole olup olmadığını tag'le
-        _tag_tracking_security(mlflow.get_tracking_uri())
+        # --- Güvenlik / framework tag'leri (OWASP + MITRE ATLAS) ---
+        tracking_uri = mlflow.get_tracking_uri()
+        is_local = (
+            tracking_uri.startswith("http://127.0.0.1")
+            or tracking_uri.startswith("http://localhost")
+            or tracking_uri.startswith("file:")
+        )
+
+        mlflow.set_tag("security_frameworks", "OWASP-LLM-Top10, MITRE-ATLAS")
+        mlflow.set_tag("tracking_uri", tracking_uri)
+        mlflow.set_tag("tracking_is_local_or_file", str(is_local))
+
+        # Beklenmedik remote MLflow'a loglamayı reddet
+        if not is_local:
+            raise RuntimeError(
+                f"MLflow tracking URI güvenli değil görünüyor: {tracking_uri}. "
+                "Sadece local/file MLflow'a loglamaya izin veriyorum."
+            )
 
         # HİÇBİR SECRET LOGLANMIYOR → sadece hiperparametre ve veri yolu bilgileri
         mlflow.log_param("features", json.dumps(X_cols))

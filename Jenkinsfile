@@ -14,7 +14,7 @@ pipeline {
 
   stages {
 
-    stage('Security - Preflight') {
+    stage('MLSecOps Audit') {
       steps {
         sh '''
           set -e
