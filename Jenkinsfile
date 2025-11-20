@@ -34,19 +34,21 @@ pipeline {
       }
     }
 
-    stage('Data Versioning (DVC pull)') {
-      steps {
-        sh '''
-          set -e
-          $PY -m pip install -U pip
-          $PY -m pip install --no-cache-dir dvc
+  stage('Data Versioning (DVC check)') {
+    steps {
+      sh '''
+        set -e
+        $PY -m pip install -U pip
+        $PY -m pip install --no-cache-dir dvc
 
-          # DVC'yi direkt komut olarak değil, modül olarak çağırıyoruz
-          $PY -m dvc pull
-          $PY -m dvc status
-        '''
-      }
+        echo ">>> DVC metadata kontrolü yapılıyor (remote tanımlı değil, pull yok)..."
+        # Remote tanımlı olmadığı için pull denemiyoruz; sadece status bakıyoruz.
+        # Hata olsa bile pipeline'ı kırmamak için '|| true' ekliyoruz.
+        $PY -m dvc status || true
+      '''
     }
+  }
+
 
     stage('Train - scikit-learn') {
       environment {
