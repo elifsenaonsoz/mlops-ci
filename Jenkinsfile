@@ -41,8 +41,9 @@ pipeline {
           $PY -m pip install -U pip
           $PY -m pip install --no-cache-dir dvc
 
-          dvc pull
-          dvc status
+          # DVC'yi direkt komut olarak değil, modül olarak çağırıyoruz
+          $PY -m dvc pull
+          $PY -m dvc status
         '''
       }
     }
