@@ -3,10 +3,8 @@ pipeline {
   options { timestamps() }
 
   environment {
-    // Sistemdeki Python yorumlayıcısı
     PY = 'python3'
 
-    // MLflow server'ın local çalışıyor
     MLFLOW_TRACKING_URI = 'http://127.0.0.1:5000'
     MLFLOW_UI_BASE      = 'http://127.0.0.1:5000'
     MLFLOW_ALLOW_REMOTE = '0'
@@ -34,21 +32,20 @@ pipeline {
       }
     }
 
-  stage('Data Versioning (DVC check)') {
-    steps {
-      sh '''
-        set -e
-        $PY -m pip install -U pip
-        $PY -m pip install --no-cache-dir dvc
+    stage('Data Versioning (DVC check)') {
+      steps {
+        sh '''
+          set -e
+          $PY -m pip install -U pip
+          $PY -m pip install --no-cache-dir dvc
 
-        echo ">>> DVC metadata kontrolü yapılıyor (remote tanımlı değil, pull yok)..."
-        # Remote tanımlı olmadığı için pull denemiyoruz; sadece status bakıyoruz.
-        # Hata olsa bile pipeline'ı kırmamak için '|| true' ekliyoruz.
-        $PY -m dvc status || true
-      '''
+          echo ">>> DVC metadata kontrolü yapılıyor (remote tanımlı değil, pull yok)..."
+          # Remote tanımlı olmadığı için pull denemiyoruz; sadece status bakıyoruz.
+          # Hata olsa bile pipeline'ı kırmamak için '|| true' ekliyoruz.
+          $PY -m dvc status || true
+        '''
+      }
     }
-  }
-
 
     stage('Train - scikit-learn') {
       environment {
@@ -81,6 +78,29 @@ pipeline {
         }
       }
     }
+
+    stage('MLSecOps - Promptfoo') {
+      steps {
+        sh '''
+          set -e
+          # Promptfoo testlerini çalıştır.
+          # Güvenlik assertleri başarısız olursa bile Jenkins kırılmasın diye '|| true' ekledik.
+          promptfoo eval -c security/promptfoo.yaml -o security/promptfoo_report.json || true
+
+          # Promptfoo sonuçlarını MLflow'a loglayacak script için mlflow kur.
+          $PY -m pip install --no-cache-dir mlflow==2.14.1
+
+          # Raporu MLflow'a gönder
+          $PY security/promptfoo_to_mlflow.py
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts artifacts: 'security/promptfoo_report.json', fingerprint: true
+        }
+      }
+    }
+
   }
 
   post {
